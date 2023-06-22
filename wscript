@@ -29,7 +29,6 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'ltp-protocol'
     headers.source = [
-        'model/sdnv.h',
         'model/ltp-protocol.h',
         'model/ltp-queue-set.h',
         'model/ltp-header.h',
