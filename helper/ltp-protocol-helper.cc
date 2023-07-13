@@ -95,7 +95,7 @@ LtpProtocolHelper::SetConvergenceLayerAdapter (std::string type,
 
 
 void
-LtpProtocolHelper::InstallAndLink (NodeContainer c)
+LtpProtocolHelper::InstallAndLink (NodeContainer c) 
 {
   NS_LOG_FUNCTION (this);
 
@@ -105,12 +105,15 @@ LtpProtocolHelper::InstallAndLink (NodeContainer c)
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
     {
       if (++numNode < c.GetN ())
+      //if (numNode++ % 2 == 0) // This assumes numNode stays lockstep with node EngineIds (AlexK.)
         {
-          m_claFactory.Set ("RemotePeer", UintegerValue (m_ltpid + 1));
+          m_claFactory.Set ("RemotePeer", UintegerValue (m_ltpid + 1)); // setting second node EngineId as remote peer (AlexK.)
+          //m_claFactory.Set ("RemotePeer", UintegerValue ((numNode / 2) + 1)); // numNode starts at 0, so even nodes are the first half of the pair (AlexK.)
         }
       else
         {
-          m_claFactory.Set ("RemotePeer", UintegerValue (base_addr));
+          m_claFactory.Set ("RemotePeer", UintegerValue (base_addr)); // setting first node EngineId as remote peer (AlexK.)
+          //m_claFactory.Set ("RemotePeer", UintegerValue (numNode / 2)); // odd nodes are the second half of the pair (AlexK.)
         }
 
       InstallAndLink (*i);
@@ -147,7 +150,11 @@ LtpProtocolHelper::InstallAndLink (Ptr<Node> n)
   if (mode.Get () == LtpIpResolutionTable::Ipv4)
     {
       Ptr<Ipv4> ipv4 = n->GetObject<Ipv4> ();
-      m_resolutionTable->AddBinding (m_ltpid,ipv4->GetAddress (1,0).GetLocal (),port.Get ());
+      for (uint32_t i = 1; i < ipv4->GetNInterfaces (); i++) // 0 is loopback; add bindings for addresses on all of the nodes interfaces (AlexK.)
+      {
+        m_resolutionTable->AddBinding (m_ltpid,ipv4->GetAddress (i,0).GetLocal (),port.Get ());
+      }
+      //m_resolutionTable->AddBinding (m_ltpid,ipv4->GetAddress (1,0).GetLocal (),port.Get ());
     }
   else
     {
@@ -263,6 +270,47 @@ LtpProtocolHelper::Install (std::string nodeName)
   NS_LOG_FUNCTION (this);
   Ptr<Node> node = Names::Find<Node> (nodeName);
   Install (node);
+}
+
+void
+LtpProtocolHelper::Link (Ptr<Node> n, uint64_t remotePeer)
+{
+  NS_LOG_FUNCTION (this);
+  m_claFactory.Set ("RemotePeer", UintegerValue (remotePeer));
+  Ptr<LtpConvergenceLayerAdapter> link = m_claFactory.Create ()->GetObject<LtpConvergenceLayerAdapter> ();
+  if (link == 0)
+  {
+    NS_FATAL_ERROR ("The requested cla does not exist: \"" <<
+                    m_claFactory.GetTypeId ().GetName () << "\"");
+  }
+
+  Ptr<LtpProtocol> ltpProtocol = n->GetObject<LtpProtocol> ();
+  link->SetProtocol (ltpProtocol);
+  ltpProtocol->AddConvergenceLayerAdapter (link);
+  link->EnableReceive (ltpProtocol->GetLocalEngineId ());
+
+  ltpProtocol->EnableLinkStateCues (link);
+
+  EnumValue mode = 0;
+  m_resolutionTable->GetAttribute ("Addressing",mode);
+
+  UintegerValue port = 0;
+  link->GetAttribute ("ServerPort",port);
+
+  if (mode.Get () == LtpIpResolutionTable::Ipv4)
+    {
+      Ptr<Ipv4> ipv4 = n->GetObject<Ipv4> ();
+      m_resolutionTable->AddBinding (m_ltpid,ipv4->GetAddress (1,0).GetLocal (),port.Get ());
+    }
+  else
+    {
+      Ptr<Ipv6> ipv6 = n->GetObject<Ipv6> ();
+      m_resolutionTable->AddBinding (m_ltpid,ipv6->GetAddress (1,0).GetAddress (),port.Get ());
+    }
+
+  link->SetLinkUpCallback ( MakeCallback (&LtpProtocol::Send,ltpProtocol));
+
+  Simulator::Schedule (m_startTime, &LtpUdpConvergenceLayerAdapter::SetLinkUp, link);
 }
 
 void

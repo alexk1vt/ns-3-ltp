@@ -135,8 +135,14 @@ public:
 
   void InstallAndLink (Ptr<Node> node, uint64_t remotePeer);
 
-
   void Install (std::string nodeName);
+
+  /*
+  * \brief Add additional LtpConvergenceLayerAdapter to a given node
+  * for a given remote peer.
+  * Requires the node to be fully configured for LtpProtocol.
+  */
+  void Link (Ptr<Node> node, uint64_t remotePeer);
 
 private:
 

@@ -97,6 +97,17 @@ ClientServiceInstanceNotificationsRcv (SessionId id,
 
 }
 
+void charArrayToVec (const char* charArray, std::vector<uint8_t> &vec)
+{
+  size_t arrayLen = strlen(charArray);
+
+  vec.resize(arrayLen);
+
+  for (size_t i = 0; i < arrayLen; i++)
+    {
+      vec.push_back (static_cast<uint8_t>(charArray[i]));
+    }
+}
 
 int
 main (int argc, char *argv[])
@@ -173,10 +184,34 @@ main (int argc, char *argv[])
 
   // Create a block of data
   std::vector<uint8_t> data3 ( 5000, 65);
+  const char* dataBuffer = "Books serve to show a man that those original thoughts of his aren't very new after all.";
+  
+  //size_t bufferSize = sizeof(dataBuffer);
+  //std::vector<uint8_t> data1;
+  //data1.resize(bufferSize);
+  //std::transform(dataBuffer, dataBuffer + bufferSize, data1.begin(), [](char v) { return static_cast<const uint8_t>(v); });
+
+  std::vector<uint8_t> data1;
+  charArrayToVec(dataBuffer, data1);
+  std::cout << "data1.size() = " << data1.size() << std::endl;
+  std::cout << "data1.max_size() = " << data1.max_size() << std::endl;
+  std::cout << "data1.capacity() = " << data1.capacity() << std::endl;
+
+  data1.erase(data1.begin() + data1.size() - 1); // remove the null terminator?
+  std::cout << "data1.size() = " << data1.size() << std::endl;
+  std::cout << "data1.max_size() = " << data1.max_size() << std::endl;
+  std::cout << "data1.capacity() = " << data1.capacity() << std::endl;
+
+  //data1.pop_back(); // remove the null terminator?
+  data1.push_back(0); // add null terminator
+  std::cout << "data1.size() = " << data1.size() << std::endl;
+  std::cout << "data1.max_size() = " << data1.max_size() << std::endl;
+  std::cout << "data1.capacity() = " << data1.capacity() << std::endl;
 
   // Transmit if from n0 to n1.
   uint64_t receiverLtpId = nodes.Get (1)->GetObject<LtpProtocol> ()->GetLocalEngineId ();
-  nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data3,1500);
+  //nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data3,1500);
+  nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data1,data1.size());
 
   Simulator::Run ();
   Simulator::Destroy ();
