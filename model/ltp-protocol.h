@@ -250,6 +250,10 @@ public:
    */
   uint32_t GetRetransCycleLimit () const;
   /**
+   * \return OneWayLightTime
+  */
+  Time GetOneWayLightTime () const;
+  /**
    * Get node of this ltp protocol instance
    * \return pointer to node
    */

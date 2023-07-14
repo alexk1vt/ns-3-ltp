@@ -227,6 +227,12 @@ uint32_t LtpProtocol::GetRetransCycleLimit () const
   return m_rtxCycleLimit;
 }
 
+Time LtpProtocol::GetOneWayLightTime () const
+{
+  NS_LOG_FUNCTION (this);
+  return m_onewayLightTime;
+}
+
 bool LtpProtocol::RegisterClientService (uint64_t id,  const CallbackBase & cb )
 {
   NS_LOG_FUNCTION (this << id);
