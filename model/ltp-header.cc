@@ -19,7 +19,8 @@
  */
 
 #include "ns3/log.h"
-#include "ns3/sdnv.h"
+//#include "ns3/sdnv.h"
+#include "sdnv.h"
 #include "ltp-header.h"
 #include "ns3/tag-buffer.h"
 

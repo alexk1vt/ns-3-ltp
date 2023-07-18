@@ -35,6 +35,9 @@ LtpIpResolutionTable::LtpIpResolutionTable ()
 LtpIpResolutionTable::~LtpIpResolutionTable ()
 {
   NS_LOG_FUNCTION (this);
+
+  m_ltpToIpv4Addr.clear ();
+  m_ltpToIpv6Addr.clear ();
 }
 
 TypeId

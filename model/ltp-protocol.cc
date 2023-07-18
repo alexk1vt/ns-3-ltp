@@ -369,13 +369,18 @@ void LtpProtocol::SignifyRedPartReception (SessionId id)
               p->RemoveHeader (contentHeader);
 
               uint32_t size = p->GetSize ();
+              if (size == 0)
+              {
+                NS_LOG_DEBUG ("Empty packet received");
+                continue;
+              }
               uint8_t *raw_data = new uint8_t[size];
               p->CopyData (raw_data, size);
 
               std::vector<uint8_t> packetData ( raw_data, raw_data + size);
 
               blockData.insert ( blockData.end (), packetData.begin (), packetData.end () );
-              delete raw_data;
+              delete[] raw_data;
             }
 
           if (header.GetSegmentType () == LTPTYPE_RD_CP_EORP_EOB)
@@ -385,6 +390,10 @@ void LtpProtocol::SignifyRedPartReception (SessionId id)
         }
 
       itCls->second->ReportStatus (id,RED_PART_RCV, blockData, blockData.size (), EOB,  remoteLtp);
+    }
+    else
+    {
+      NS_FATAL_ERROR ("Active session not found");
     }
 
 }
@@ -446,6 +455,10 @@ void LtpProtocol::SignifyGreenPartSegmentArrival (SessionId id)
       itCls->second->ReportStatus (id,GP_SEGMENT_RCV, packetData, packetData.size (), EOB,  remoteLtp, offset);
 
     }
+    else
+    {
+      NS_FATAL_ERROR ("Session is not a receiver session");
+    }
 
 }
 
@@ -491,13 +504,17 @@ void LtpProtocol::CloseSession (SessionId id)
       itCls->second->ReportStatus (id, SESSION_END);
 
     }
+    else
+    {
+      NS_FATAL_ERROR ("Active session not found");
+    }
 
 }
 
 void LtpProtocol::SetCheckPointTransmissionTimer (SessionId id, RedSegmentInfo info)
 {
   NS_LOG_FUNCTION (this << id << info.CpserialNum << info.low_bound << info.high_bound << info.claims.size ());
-
+  //return;
   SessionStateRecords::iterator it = m_activeSessions.find (id);
 
   Ptr<SessionStateRecord> ssr = 0;
@@ -516,7 +533,7 @@ void LtpProtocol::SetCheckPointTransmissionTimer (SessionId id, RedSegmentInfo i
 void LtpProtocol::SetReportReTransmissionTimer (SessionId id, RedSegmentInfo info)
 {
   NS_LOG_FUNCTION (this << id);
-
+  //return;
   SessionStateRecords::iterator it = m_activeSessions.find (id);
   Ptr<SessionStateRecord> ssr = 0;
 

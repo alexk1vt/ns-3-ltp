@@ -210,8 +210,8 @@ main (int argc, char *argv[])
 
   // Transmit if from n0 to n1.
   uint64_t receiverLtpId = nodes.Get (1)->GetObject<LtpProtocol> ()->GetLocalEngineId ();
-  //nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data3,1500);
-  nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data1,data1.size());
+  nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data3,1500);
+  //nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data1,data1.size());
 
   Simulator::Run ();
   Simulator::Destroy ();
