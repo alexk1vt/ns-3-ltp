@@ -197,21 +197,22 @@ main (int argc, char *argv[])
   std::cout << "data1.max_size() = " << data1.max_size() << std::endl;
   std::cout << "data1.capacity() = " << data1.capacity() << std::endl;
 
+  
   data1.erase(data1.begin() + data1.size() - 1); // remove the null terminator?
   std::cout << "data1.size() = " << data1.size() << std::endl;
   std::cout << "data1.max_size() = " << data1.max_size() << std::endl;
   std::cout << "data1.capacity() = " << data1.capacity() << std::endl;
-
+  /*
   //data1.pop_back(); // remove the null terminator?
   data1.push_back(0); // add null terminator
   std::cout << "data1.size() = " << data1.size() << std::endl;
   std::cout << "data1.max_size() = " << data1.max_size() << std::endl;
   std::cout << "data1.capacity() = " << data1.capacity() << std::endl;
-
+  */
   // Transmit if from n0 to n1.
   uint64_t receiverLtpId = nodes.Get (1)->GetObject<LtpProtocol> ()->GetLocalEngineId ();
-  nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data3,1500);
-  //nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data1,data1.size());
+  //nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data3,1500);
+  nodes.Get (0)->GetObject<LtpProtocol> ()->StartTransmission (ClientServiceId,ClientServiceId,receiverLtpId,data1,0);
 
   Simulator::Run ();
   Simulator::Destroy ();

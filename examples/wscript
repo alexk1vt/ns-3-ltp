@@ -6,5 +6,8 @@ def build(bld):
 
     obj = bld.create_ns3_program('ltp-protocol-long-transmission-example', ['ltp-protocol', 'core', 'internet', 'network', 'point-to-point','flow-monitor'])
     obj.source = 'ltp-protocol-long-transmission-example.cc'
+    
+    obj = bld.create_ns3_program('ltp-protocol-test', ['ltp-protocol', 'core', 'internet', 'network', 'point-to-point'])
+    obj.source = 'ltp-protocol-test.cc'
 
 
