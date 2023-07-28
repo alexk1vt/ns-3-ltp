@@ -195,5 +195,24 @@ LtpIpResolutionTable::AddressMode LtpIpResolutionTable::GetAddressMode () const
   return m_addressMode;
 }
 
+//InetSocketAddress ::GetRouteFromIP (uint64_t dstLtpEngineId)
+uint64_t LtpIpResolutionTable::GetRouteFromIPv4 (InetSocketAddress iaddr)
+{
+  NS_LOG_FUNCTION (this << " " << iaddr.GetIpv4 ());
+
+  std::map <uint64_t, InetSocketAddress>::iterator it = m_ltpToIpv4Addr.begin ();
+  for (; it != m_ltpToIpv4Addr.end (); it++)
+  {
+    NS_LOG_FUNCTION (this << " has entry: " << it->first << " : " << it->second.GetIpv4 ());
+    if (it->second.GetIpv4 () == iaddr.GetIpv4 ()) // using Ipv4 addresses to avoid matching incoming UDP traffic ports
+      {
+        NS_LOG_FUNCTION (this << " found entry: " << it->second.GetIpv4 () << " that matches " << iaddr.GetIpv4 ());
+        return it->first;
+      }
+  }
+  NS_LOG_FUNCTION (this << " did not find matching entry");
+  return BAD_ADDRESS;
+}
+
 } //namespace ltp
 } //namespace ns3

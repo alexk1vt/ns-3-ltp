@@ -54,6 +54,11 @@ public:
 	  Ipv6 = 1
 	};
 
+  enum AddressLabel
+  {
+    BAD_ADDRESS = 9999999999999999
+  };
+
 
 
   static TypeId GetTypeId (void);
@@ -136,7 +141,6 @@ public:
    * \return true if the class instance found a match and was able to delete it */
   bool RemoveBinding (uint64_t LtpEngineId, Ipv6Address Addr, uint16_t port);
 
-
   /* If there are multiple bindings, flag m_adddressMode
    * controls whether the IPv4 or Ipv6 binding map
    *  is searched first, and the first entry that was added that matches
@@ -159,6 +163,8 @@ public:
    * \return Corresponding Ipv4 address for Ltp Engine Id,  or loopback addr if not found.
    */
   Inet6SocketAddress GetIpv6Route (uint64_t LtpEngineId);
+
+  uint64_t GetRouteFromIPv4 (InetSocketAddress iaddr);
 
   /**
    * \brief Print the Bindings for Ipv4 Addresses

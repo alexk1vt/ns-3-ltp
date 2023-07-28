@@ -208,7 +208,11 @@ void LtpUdpConvergenceLayerAdapter::Receive (Ptr<Socket> socket)
   Address peer;
   while ((packet = socket->RecvFrom (peer)))
     {
-	Simulator::ScheduleNow ( &LtpProtocol::Receive, m_ltp, packet, this);
+      InetSocketAddress iaddr = InetSocketAddress::ConvertFrom (peer);
+      NS_LOG_FUNCTION (this << " " << socket << " received packet from " << iaddr.GetIpv4 ());
+
+    	//Simulator::ScheduleNow ( &LtpProtocol::Receive, m_ltp, packet, this);
+      Simulator::ScheduleNow ( &LtpProtocol::ReceiveFrom, m_ltp, packet, iaddr);
     }
 }
 

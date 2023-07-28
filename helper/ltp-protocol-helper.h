@@ -27,6 +27,7 @@
 #include "ns3/ptr.h"
 #include "ns3/object-factory.h"
 #include "ns3/address.h"
+#include "ns3/point-to-point-module.h"
 #include "ns3/ltp-convergence-layer-adapter.h"
 #include "ns3/ltp-udp-convergence-layer-adapter.h"
 #include "ns3/ltp-ip-resolution-table.h"
@@ -143,6 +144,9 @@ public:
   * Requires the node to be fully configured for LtpProtocol.
   */
   void Link (Ptr<Node> node, uint64_t remotePeer);
+
+  //void LinkP2P (Ipv4InterfaceContainer iContainer);
+  //void Link (Ptr<Ipv4Interface> interface, uint64_t remotePeer);
 
 private:
 

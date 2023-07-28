@@ -223,6 +223,8 @@ public:
    */
   void Receive (Ptr<Packet> packet, Ptr<LtpConvergenceLayerAdapter> cla);
 
+  void ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr);
+  
   /* Getters Methods */
 
   /**

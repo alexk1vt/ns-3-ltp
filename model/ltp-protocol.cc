@@ -77,29 +77,29 @@ void ClientServiceStatus::ReportStatus (SessionId id,
 void ClientServiceStatus::AddSession (SessionId id)
 {
   NS_LOG_FUNCTION (this);
-  m_activeSessions.insert (m_activeSessions.begin (), id);
+  m_cssActiveSessions.insert (m_cssActiveSessions.begin (), id);
 }
 
 void ClientServiceStatus::ClearSessions ()
 {
   NS_LOG_FUNCTION (this);
-  m_activeSessions.clear ();
+  m_cssActiveSessions.clear ();
 }
 
 SessionId ClientServiceStatus::GetSession (uint32_t index)
 {
   NS_LOG_FUNCTION (this);
-  return m_activeSessions.at (index);
+  return m_cssActiveSessions.at (index);
 }
 
 uint32_t ClientServiceStatus::GetNSessions () const
 {
   NS_LOG_FUNCTION (this);
-  return m_activeSessions.size ();
+  return m_cssActiveSessions.size ();
 }
 
 LtpProtocol::LtpProtocol ()
-  : m_activeSessions (),
+  : m_cssActiveSessions (),
     m_activeClients (),
     m_clas (),
     m_localEngineId (0),
@@ -284,9 +284,10 @@ uint32_t LtpProtocol::StartTransmission ( uint64_t sourceId, uint64_t dstClientS
   it->second->AddSession (id);
 
   /* Keep Track of new session */
-  std::pair<SessionId,Ptr<SessionStateRecord> > entry;
-  entry = std::make_pair (id, DynamicCast< SessionStateRecord > (ssr) );
-  m_activeSessions.insert (m_activeSessions.begin (),entry);
+  //std::pair<SessionId,Ptr<SessionStateRecord> > entry;
+  //entry = std::make_pair (id, DynamicCast< SessionStateRecord > (ssr) );
+  //m_activeSessions.insert (m_activeSessions.begin (),entry);
+  m_activeSessions.insert (std::pair<SessionId, Ptr<SessionStateRecord> > (id, DynamicCast< SessionStateRecord > (ssr)));
 
   if (rdSize == 0)
     {
@@ -554,6 +555,13 @@ void LtpProtocol::Send (Ptr<LtpConvergenceLayerAdapter> cla)
 {
   NS_LOG_FUNCTION (this);
   SessionId id =  cla->GetSessionId ();
+  if (id.GetSessionNumber () == 0)
+  {
+    NS_LOG_DEBUG (this << " ERROR: Unable to Send: No Active Session Id for cla: " << cla );
+    return;
+  }
+  NS_LOG_FUNCTION (this << " Found active session id: " << id);
+  
   SessionStateRecords::iterator it = m_activeSessions.find (id);
 
   // Dequeue all segments from SSR
@@ -568,10 +576,76 @@ void LtpProtocol::Send (Ptr<LtpConvergenceLayerAdapter> cla)
         }
     }
 }
+
+void LtpProtocol::ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr)
+{
+  NS_LOG_FUNCTION (this << " packet " << packet << " iaddr: " << iaddr.GetIpv4 ());
+  uint64_t ltpEngineId = GetLocalEngineId ();
+  Ptr<LtpConvergenceLayerAdapter> cla;
+  NS_LOG_FUNCTION (this << " internalEngineId: " << ltpEngineId << " received packet from " << iaddr.GetIpv4 ());
+  NS_LOG_FUNCTION (this << " internalEngineId: " << ltpEngineId << " has " << m_clas.size () << " CLAs");
+
+  ltpEngineId = LtpIpResolutionTable::BAD_ADDRESS;
+
+  if (m_clas.size () == 1)
+  {
+    cla = m_clas.begin ()->second;
+    NS_LOG_DEBUG ("Only one CLA found: " << cla);
+    Receive (packet, cla);
+    return;
+  }
+
+  // Iterate through CLAs to find one with a route that matches IP to ltpEngineId
+  ConvergenceLayerAdapters::iterator itCla = m_clas.begin ();
+  for (; itCla != m_clas.end (); ++itCla)
+  {
+    cla = itCla->second;
+    if (cla)
+    {
+      Ptr<LtpIpResolutionTable> ipTable = cla->GetRoutingProtocol ();
+      if (ipTable)
+      {
+        ltpEngineId = ipTable->GetRouteFromIPv4 (iaddr);
+        if (ltpEngineId != LtpIpResolutionTable::BAD_ADDRESS)
+        {
+          NS_LOG_DEBUG ("Found binding for address " << iaddr.GetIpv4 () << " with engine id of: " << ltpEngineId);
+          break;
+        }
+      }
+    }
+  }
+  if (itCla == m_clas.end ())
+  {
+    NS_LOG_DEBUG ("No binding found for address " << iaddr.GetIpv4 ());
+    return;
+  }
+  
+  // FOR DEBUG PURPOSES - delete when finished
+  itCla = m_clas.begin ();
+  for (; itCla != m_clas.end (); ++itCla)
+  {
+    NS_LOG_DEBUG ("CLA " << itCla->second << " has remote peer " << itCla->first);
+  }
+
+  // Now with the engineId, find CLA that has that engineId as remote peer
+  itCla = m_clas.find (ltpEngineId);
+  if (itCla == m_clas.end ())
+  {
+    NS_LOG_DEBUG ("No CLA found for remote peer " << iaddr.GetIpv4 ());
+    return;
+  }
+  NS_LOG_FUNCTION(this << " found CLA " << itCla->second << " for remote peer " << iaddr.GetIpv4 ());
+  cla = itCla->second;
+
+  // Now that we have the cla for the remote peer, we can call the Receive method
+  Receive (packet, cla);
+
+}
+
 /* Should be called from lower layer */
 void LtpProtocol::Receive (Ptr<Packet> packet, Ptr<LtpConvergenceLayerAdapter> cla)
 {
-  NS_LOG_FUNCTION (this);
+  NS_LOG_FUNCTION (this << " packet: " << packet << "; CLA: " << cla);
 
   LtpHeader header;
   LtpContentHeader contentHeader;
@@ -587,8 +661,17 @@ void LtpProtocol::Receive (Ptr<Packet> packet, Ptr<LtpConvergenceLayerAdapter> c
 
   SessionId id = header.GetSessionId ();
   SegmentType type = header.GetSegmentType ();
+  
+  NS_LOG_FUNCTION (this << " packet has Session id: " << id << " and is type: " << type << "; LTP has " << m_activeSessions.size () << " active sessions");
+  //for DEBUG purposes only:
+  SessionStateRecords::iterator debugIt = m_activeSessions.begin ();
+  for (; debugIt != m_activeSessions.end (); ++debugIt)
+  {
+    NS_LOG_DEBUG ("Session " << debugIt->first << " is an active Type: " << debugIt->second->GetInstanceTypeId () << " session");
+  }
 
   SessionStateRecords::iterator itSessions = m_activeSessions.find (id);
+
   Ptr<ReceiverSessionStateRecord> srecv = 0;
   Ptr<SenderSessionStateRecord> ssend = 0;
 
@@ -603,6 +686,7 @@ void LtpProtocol::Receive (Ptr<Packet> packet, Ptr<LtpConvergenceLayerAdapter> c
         {
           // Service Client does not exist
           // Send CX Segment.
+          NS_LOG_DEBUG ("Service Client does not exist; returning");
           return;
         }
 
@@ -618,16 +702,17 @@ void LtpProtocol::Receive (Ptr<Packet> packet, Ptr<LtpConvergenceLayerAdapter> c
 
       /* Add to active sessions */
       NS_LOG_DEBUG ("Receiver session started with id:" <<  id);
-      std::pair<SessionId,Ptr<SessionStateRecord> > entry;
-      entry = std::make_pair (id, DynamicCast< SessionStateRecord > (srecv) );
-      m_activeSessions.insert (m_activeSessions.begin (),entry);
+      //std::pair<SessionId,Ptr<SessionStateRecord> > entry;
+      //entry = std::make_pair (id, DynamicCast< SessionStateRecord > (srecv) );
+      //m_activeSessions.insert (m_activeSessions.begin (),entry);
+      m_activeSessions.insert (std::pair<SessionId,Ptr<SessionStateRecord> > (id, DynamicCast< SessionStateRecord > (srecv) ));
 
       cla->SetSessionId (id);
 
     }
   else
     {
-
+    NS_LOG_DEBUG ("Active session found with id: " <<  id);
 	  /* This is a temporary fix until the implementation of CX segments */
 	  if (itSessions->second->IsSuspended())
 	  {
@@ -640,10 +725,12 @@ void LtpProtocol::Receive (Ptr<Packet> packet, Ptr<LtpConvergenceLayerAdapter> c
       /* Check if we are on the receiver or the sender side */
       if (itSessions->second->GetInstanceTypeId () == SenderSessionStateRecord::GetTypeId ())
         {
+          NS_LOG_DEBUG ("Session is a sender session");
           ssend = DynamicCast<SenderSessionStateRecord> (itSessions->second);
         }
       else
         {
+          NS_LOG_DEBUG ("Session is a receiver session");
           srecv = DynamicCast<ReceiverSessionStateRecord> (itSessions->second);
 
         }
@@ -1004,7 +1091,7 @@ void LtpProtocol::RetransmitCheckpoint (SessionId id, RedSegmentInfo info)
 
 uint64_t LtpProtocol::GetLocalEngineId () const
 {
-  NS_LOG_FUNCTION (this);
+  NS_LOG_FUNCTION (this << " returning " << m_localEngineId);
   return m_localEngineId;
 }
 

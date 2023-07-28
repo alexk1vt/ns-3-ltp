@@ -146,6 +146,7 @@ public:
    */
   virtual Ptr<LtpIpResolutionTable> GetRoutingProtocol () const;
 
+
 private:
 
   /* Attribute values */
