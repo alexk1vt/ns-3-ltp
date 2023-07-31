@@ -35,7 +35,7 @@ namespace ltp {
 
 
 ClientServiceStatus::ClientServiceStatus ()
-  : m_activeSessions (),
+  : m_cssActiveSessions (),
     m_reportStatus ()
 {
   NS_LOG_FUNCTION (this);
@@ -99,7 +99,7 @@ uint32_t ClientServiceStatus::GetNSessions () const
 }
 
 LtpProtocol::LtpProtocol ()
-  : m_cssActiveSessions (),
+  : m_activeSessions (),
     m_activeClients (),
     m_clas (),
     m_localEngineId (0),

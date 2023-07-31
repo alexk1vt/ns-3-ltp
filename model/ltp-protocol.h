@@ -127,7 +127,7 @@ public:
   SessionId GetSession (uint32_t index);
 
 private:
-  std::vector<SessionId> m_activeSessions; //!< Client Service Instance Active Sessions
+  std::vector<SessionId> m_cssActiveSessions; //!< Client Service Instance Active Sessions
 
   TracedCallback<SessionId,
                  StatusNotificationCode,
@@ -407,7 +407,15 @@ private:
 
   Ptr<Node>  m_node; // Node in which this ltp engine is running
 
-  typedef std::map<SessionId,Ptr<SessionStateRecord> > SessionStateRecords;
+  struct cmp_sessionId
+  {
+    bool operator()(SessionId lhs, SessionId rhs) const
+    {
+      return lhs.GetSessionNumber() < rhs.GetSessionNumber();
+    }
+  };
+
+  typedef std::map<SessionId,Ptr<SessionStateRecord>, cmp_sessionId > SessionStateRecords;
   typedef std::map<uint64_t, Ptr<ClientServiceStatus> > ClientServiceInstances;
   typedef std::map<uint64_t, Ptr<LtpConvergenceLayerAdapter> > ConvergenceLayerAdapters;
 
