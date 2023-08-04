@@ -274,6 +274,9 @@ public:
    */
   bool IsActive (Time t);
 
+  InetSocketAddress GetBindingFromLtpEngineId (uint64_t ltpEngineId);
+  uint64_t GetBindingFromIpv4Addr (InetSocketAddress iaddr);
+
   /* Setter functions */
 
   /**

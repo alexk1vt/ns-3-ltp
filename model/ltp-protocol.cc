@@ -577,6 +577,58 @@ void LtpProtocol::Send (Ptr<LtpConvergenceLayerAdapter> cla)
     }
 }
 
+InetSocketAddress
+LtpProtocol::GetBindingFromLtpEngineId (uint64_t ltpEngineId)
+{
+  NS_LOG_FUNCTION (this << " ltpEngineId: " << ltpEngineId);
+  InetSocketAddress iaddr ("127.0.0.1", 0);
+
+  // With the engineId, find CLA that has that engineId as remote peer
+  ConvergenceLayerAdapters::iterator itCla = m_clas.find (ltpEngineId);
+  if (itCla == m_clas.end ())
+  {
+    NS_LOG_DEBUG ("No CLA found for remote peer " << ltpEngineId);
+    return iaddr;
+  }
+  NS_LOG_FUNCTION(this << " found CLA " << itCla->second << " for remote peer " << ltpEngineId);
+  
+  // With CLA, look up in routing table
+  Ptr<LtpConvergenceLayerAdapter> cla = itCla->second;
+  Ptr<LtpIpResolutionTable> ipTable = cla->GetRoutingProtocol ();
+  if (ipTable)
+  {
+    InetSocketAddress iaddr = ipTable->GetIpv4Route (ltpEngineId);
+  }
+  if (iaddr == InetSocketAddress ("127.0.0.1", 0))
+  {
+    NS_LOG_DEBUG ("No binding found for engineId " << ltpEngineId);
+  }
+  return iaddr;
+}
+
+uint64_t
+LtpProtocol::GetBindingFromIpv4Addr (InetSocketAddress iaddr)
+{
+  NS_LOG_FUNCTION (this << " iaddr: " << iaddr.GetIpv4 ());
+  // Iterate through CLAs to find one with a route that matches IP to ltpEngineId
+  uint64_t ltpEngineId = LtpIpResolutionTable::BAD_ADDRESS;
+  ConvergenceLayerAdapters::iterator itCla = m_clas.begin ();
+  for (; itCla != m_clas.end (); ++itCla)
+  {
+    Ptr<LtpIpResolutionTable> ipTable = itCla->second->GetRoutingProtocol ();
+    if (ipTable)
+    {
+      ltpEngineId = ipTable->GetRouteFromIPv4 (iaddr);
+      if (ltpEngineId != LtpIpResolutionTable::BAD_ADDRESS)
+      {
+        NS_LOG_DEBUG ("Found binding for address " << iaddr.GetIpv4 () << " with engine id of: " << ltpEngineId);
+        break;
+      }
+    }
+  }
+  return ltpEngineId;
+}
+
 void LtpProtocol::ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr)
 {
   NS_LOG_FUNCTION (this << " packet " << packet << " iaddr: " << iaddr.GetIpv4 ());
@@ -585,8 +637,6 @@ void LtpProtocol::ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr)
   NS_LOG_FUNCTION (this << " internalEngineId: " << ltpEngineId << " received packet from " << iaddr.GetIpv4 ());
   NS_LOG_FUNCTION (this << " internalEngineId: " << ltpEngineId << " has " << m_clas.size () << " CLAs");
 
-  ltpEngineId = LtpIpResolutionTable::BAD_ADDRESS;
-
   if (m_clas.size () == 1)
   {
     cla = m_clas.begin ()->second;
@@ -594,8 +644,9 @@ void LtpProtocol::ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr)
     Receive (packet, cla);
     return;
   }
-
+  /*
   // Iterate through CLAs to find one with a route that matches IP to ltpEngineId
+  uint64_t destLtpEngineId = LtpIpResolutionTable::BAD_ADDRESS;
   ConvergenceLayerAdapters::iterator itCla = m_clas.begin ();
   for (; itCla != m_clas.end (); ++itCla)
   {
@@ -605,10 +656,10 @@ void LtpProtocol::ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr)
       Ptr<LtpIpResolutionTable> ipTable = cla->GetRoutingProtocol ();
       if (ipTable)
       {
-        ltpEngineId = ipTable->GetRouteFromIPv4 (iaddr);
-        if (ltpEngineId != LtpIpResolutionTable::BAD_ADDRESS)
+        destLtpEngineId = ipTable->GetRouteFromIPv4 (iaddr);
+        if (destLtpEngineId != LtpIpResolutionTable::BAD_ADDRESS)
         {
-          NS_LOG_DEBUG ("Found binding for address " << iaddr.GetIpv4 () << " with engine id of: " << ltpEngineId);
+          NS_LOG_DEBUG ("Found binding for address " << iaddr.GetIpv4 () << " with engine id of: " << destLtpEngineId);
           break;
         }
       }
@@ -619,16 +670,16 @@ void LtpProtocol::ReceiveFrom (Ptr<Packet> packet, InetSocketAddress iaddr)
     NS_LOG_DEBUG ("No binding found for address " << iaddr.GetIpv4 ());
     return;
   }
-  
-  // FOR DEBUG PURPOSES - delete when finished
-  itCla = m_clas.begin ();
-  for (; itCla != m_clas.end (); ++itCla)
+  */
+  uint64_t destLtpEngineId = GetBindingFromIpv4Addr (iaddr);
+  if (destLtpEngineId == LtpIpResolutionTable::BAD_ADDRESS)
   {
-    NS_LOG_DEBUG ("CLA " << itCla->second << " has remote peer " << itCla->first);
+    NS_LOG_DEBUG ("No binding found for address " << iaddr.GetIpv4 ());
+    return;
   }
 
   // Now with the engineId, find CLA that has that engineId as remote peer
-  itCla = m_clas.find (ltpEngineId);
+  ConvergenceLayerAdapters::iterator itCla = m_clas.find (destLtpEngineId);
   if (itCla == m_clas.end ())
   {
     NS_LOG_DEBUG ("No CLA found for remote peer " << iaddr.GetIpv4 ());
