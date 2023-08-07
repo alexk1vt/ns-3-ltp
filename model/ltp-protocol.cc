@@ -597,7 +597,12 @@ LtpProtocol::GetBindingFromLtpEngineId (uint64_t ltpEngineId)
   Ptr<LtpIpResolutionTable> ipTable = cla->GetRoutingProtocol ();
   if (ipTable)
   {
-    InetSocketAddress iaddr = ipTable->GetIpv4Route (ltpEngineId);
+    //InetSocketAddress iaddr = ipTable->GetIpv4Route (ltpEngineId);
+    return ipTable->GetIpv4Route (ltpEngineId);
+  }
+  else
+  {
+    NS_LOG_DEBUG ("No routing table found for CLA " << cla);
   }
   if (iaddr == InetSocketAddress ("127.0.0.1", 0))
   {

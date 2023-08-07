@@ -115,10 +115,12 @@ InetSocketAddress LtpIpResolutionTable::GetIpv4Route (uint64_t dstLtpEngineId)
   if (it == m_ltpToIpv4Addr.end ())
     {
       InetSocketAddress address ("127.0.0.1", 0);
+      NS_LOG_FUNCTION (this << " No IPv4 Route for " << dstLtpEngineId << " returning " << address);
       return address;
     }
   else
     {
+      NS_LOG_FUNCTION (this << " Found IPv4 Route for " << dstLtpEngineId << " returning " << it->second.GetIpv4 ());
       return it->second;
     }
 }
