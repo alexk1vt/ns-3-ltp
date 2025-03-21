@@ -18,6 +18,16 @@
  * Author: Rubén Martínez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: Receive
+  - Related commit message: Made a number of changes; big one is ensuring Ltp receives on correct CLA associated with remote peer.
+
+*/
+
 #include "ltp-udp-convergence-layer-adapter.h"
 #include "ns3/log.h"
 #include "ns3/uinteger.h"

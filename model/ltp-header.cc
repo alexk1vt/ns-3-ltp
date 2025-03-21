@@ -18,6 +18,13 @@
  * Author: Rubén Martínez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+*/
+
 #include "ns3/log.h"
 //#include "ns3/sdnv.h"
 #include "sdnv.h"

@@ -17,6 +17,13 @@
  * Author: Rubn Martnez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+*/
+
 //        Network topology
 //
 //       n0              n1

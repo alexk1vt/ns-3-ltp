@@ -17,6 +17,18 @@
  * Author: Rubn Martnez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: main
+  - Related commit message: ltp-protocol-test.cc has a functional bit vector queue to send multiple vectors via LTP
+  - Related commit message: still having issues with inconsistent behavior
+  - Related commit message: Functional for multi-hop scenarios (uni-directional). Red code still not working for bundle-protocols. Added link(..) method for ltp-helper for bi-directional scenarios but havent yet tested.
+
+*/
+
 //        Network topology
 //
 //       n0              n1

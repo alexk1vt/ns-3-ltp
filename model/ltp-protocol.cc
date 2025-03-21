@@ -18,6 +18,41 @@
  * Author: Rubén Martínez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: GetRetransCycleLimit
+  - Related commit message: Having issues with multi-hop scenario with forwarder receiving all green data segments. Doesnt occur in simple scenario.  Occurs in simple scenario if OneWayLightTime is changed to 1ms.  Still unable to use Red Data.
+
+Modified/Added Function: SignifyRedPartReception
+  - Related commit message: still having issues with inconsistent behavior
+
+Modified/Added Function: SignifyGreenPartSegmentArrival
+  - Related commit message: still having issues with inconsistent behavior
+
+Modified/Added Function: CloseSession
+  - Related commit message: still having issues with inconsistent behavior
+
+Modified/Added Function: Send
+  - Related commit message: Made a number of changes; big one is ensuring Ltp receives on correct CLA associated with remote peer.
+  - Related commit message: able to send bundles with red and green data, but this module immediately drops green data if no link is available to send packet.  Implementing link status check in bp-ltp-cla prior to passing vector to ltp protocol for sending
+
+Modified/Added Function: RetransmitCheckpoint
+  - Related commit message: Made a number of changes; big one is ensuring Ltp receives on correct CLA associated with remote peer.
+
+Modified/Added Function: GetNSessions
+  - Related commit message: Successfully linking incoming sessions with appropriate CLA as well as resolved bug with map returning incorrect sessionIDs when searched
+
+Modified/Added Function: ReceiveFrom
+  - Related commit message: able to send bundles with red and green data, but this module immediately drops green data if no link is available to send packet.  Implementing link status check in bp-ltp-cla prior to passing vector to ltp protocol for sending
+
+Modified/Added Function: GetBindingFromLtpEngineId
+  - Related commit message: adding methods to allow BP CLA access to engine Id bindings
+
+*/
+
 #include "ltp-protocol.h"
 #include "ns3/log.h"
 #include "ns3/ptr.h"

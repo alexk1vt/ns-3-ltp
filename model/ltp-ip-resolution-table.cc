@@ -18,6 +18,22 @@
  * Author: Rubén Martínez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: LtpIpResolutionTable
+  - Related commit message: still having issues with inconsistent behavior
+
+Modified/Added Function: GetAddressMode
+  - Related commit message: Made a number of changes; big one is ensuring Ltp receives on correct CLA associated with remote peer.
+
+Modified/Added Function: GetIpv4Route
+  - Related commit message: adding methods to allow BP CLA access to engine Id bindings
+
+*/
+
 #include "ltp-ip-resolution-table.h"
 #include "ns3/enum.h"
 #include "ns3/log.h"

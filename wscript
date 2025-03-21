@@ -1,3 +1,12 @@
+"""
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: build
+  - Related commit message: slight change to account for the conflicting sdnv.h files in LTP and bundle-protocol
+
+"""
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 # def options(opt):

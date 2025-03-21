@@ -1,3 +1,12 @@
+"""
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: build
+  - Related commit message: ltp-protocol-test.cc has a functional bit vector queue to send multiple vectors via LTP
+
+"""
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):

@@ -18,6 +18,23 @@
  * Author: Rubn Martnez <rmartinez@deic.uab.cat>
  */
 
+/*
+Updates made by: Alexander Kedrowitsch <alexk1@vt.edu>
+
+Aggregate changes for commits in range: 20247a4..275be8c
+
+Modified/Added Function: InstallAndLink
+  - Related commit message: Made a number of changes; big one is ensuring Ltp receives on correct CLA associated with remote peer.
+  - Related commit message: Functional for multi-hop scenarios (uni-directional). Red code still not working for bundle-protocols. Added link(..) method for ltp-helper for bi-directional scenarios but havent yet tested.
+
+Modified/Added Function: Install
+  - Related commit message: Functional for multi-hop scenarios (uni-directional). Red code still not working for bundle-protocols. Added link(..) method for ltp-helper for bi-directional scenarios but havent yet tested.
+
+Modified/Added Function: Link
+  - Related commit message: Made a number of changes; big one is ensuring Ltp receives on correct CLA associated with remote peer.
+
+*/
+
 #include "ltp-protocol-helper.h"
 #include "ns3/object.h"
 #include "ns3/names.h"
